@@ -1,0 +1,73 @@
+void initalGameArea(void)
+{
+    int i;
+
+	/* 屏幕设置 */
+	printf("\033[2J");			  // 清屏
+    system("stty -icanon");		  // 关缓冲
+    system("stty -echo");		  // 关回显
+    fprintf(stdout,"\033[?25l");  // 关闭鼠标显示
+
+    /* 初始化行 */
+    for (i = 0; i < COL; i++)
+    {
+        gameArea[0][i]     = 8;   // 第0行
+        gameArea[5][i]     = 8;   // 第5行
+        gameArea[ROW-1][i] = 8;   // 最后一行
+    }
+
+    /* 初始化列 */
+    for (i = 0; i < ROW; i++)
+    {
+        gameArea[i][0]     = 8;  // 第0列
+        gameArea[i][COL-1] = 8;  // 最后一列
+    }
+
+    /* 中间一小列 */
+    for (i = 1; i < 5; i++)
+    {
+        gameArea[i][6] = 8;
+    }
+}
+
+
+/*
+ * 函数名：gameSelf
+ * 函数功能：作为信号函数，闹钟时间一到就自动下落
+ * 参数：信号
+ * 返回值：无
+*/
+void gameSelf(int signo)
+{
+    /* 画方块 */
+    drawBlock(bl[type][diret]);
+
+    /* 显示游戏 */
+    showGame();
+
+    /* 清除方块 */
+    cleanBlock(bl[type][diret]);
+
+    /* 如果方块已经到底 */
+    if (!checkMove(bl[type][diret],DOWN))
+    {
+    	/* 检查是否游戏结束 */
+    	checkGameOver(bl[type][diret]);
+
+    	/* 保留已经到底的方块 */
+    	drawBlock(bl[type][diret]);
+
+    	/* 显示游戏结果 */
+    	showGame();
+
+    	/* 到达边界后检查是否可消行 */
+    	checkDeleteLine();
+
+    	/* 重新开始下一个方块 */
+    	startY = 6;
+    	startX = 4;
+    	type = nextType;
+    	nextType = rand()%7;
+    	diret = 0;
+    }
+}
